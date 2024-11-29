@@ -15,11 +15,26 @@
 
 # include <stdlib.h>
 # include <unistd.h>
+# include <stdio.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 10
+#  define BUFFER_SIZE 50
 # endif
 
-char	*get_next_line(int fd);
+typedef struct	s_reader
+{
+	int				fd;
+	int				pos;
+	char			*ptr;
+	struct s_reader	*next;
+}	t_reader;
+
+t_reader	*create_reader(int fd, int pos);
+void		add_back_reader(t_reader **readers, t_reader *reader);
+void		free_reader(t_reader **readers, t_reader *reader);
+t_reader	*get_reader_by_fd(t_reader **readers, int fd);
+char		*get_next_line(int fd);
+
+char		**ft_split(char const *s, char c);
 
 #endif
