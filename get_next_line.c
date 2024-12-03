@@ -117,28 +117,28 @@ char	*str_until_i(char *ptr, int i)
 
 char	*get_next_line(int fd)
 {
-	static char	*ptr;
+	static char	*ptr[64];
 	char		*res;
 	char		*temp;
 	int			i;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	ptr = add_new_read(fd, ptr);
+	ptr[fd] = add_new_read(fd, ptr[fd]);
 	if (!ptr)
 		return (NULL);
 	i = 0;
-	while (ptr[i] && ptr[i] != '\n')
+	while (ptr[fd][i] && ptr[fd][i] != '\n')
 		i++;
-	if (ptr[i] == '\0')
+	if (ptr[fd][i] == '\0')
 	{
-		ptr = add_new_read(fd, ptr);
-		if (!ptr || ptr[0] == '\0')
+		ptr[fd] = add_new_read(fd, ptr[fd]);
+		if (!ptr[fd] || ptr[fd][0] == '\0')
 			return (NULL);
 		return (get_next_line(fd));
 	}
-	res = str_until_i(ptr, i);
-	temp = ptr;
-	ptr = ft_strdup(ptr + i + 1);
+	res = str_until_i(ptr[fd], i);
+	temp = ptr[fd];
+	ptr[fd] = ft_strdup(ptr[fd] + i + 1);
 	return (free(temp), res);
 }
