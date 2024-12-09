@@ -15,12 +15,19 @@ int	main(int argc, char *argv)
 	fd1 = open("text1.txt", O_RDONLY);
 
 	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd1));
-	printf("%s", get_next_line(fd1));
-	printf("%s", get_next_line(fd1));
 	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd1));
 	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	// printf("%s", get_next_line(fd1));
+	// printf("%s", get_next_line(fd1));
+	// printf("%s", get_next_line(fd1));
+	// printf("%s", get_next_line(fd));
+	// printf("%s", get_next_line(fd1));
+	// printf("%s", get_next_line(fd));
 
 	close(fd);
 	close(fd1);

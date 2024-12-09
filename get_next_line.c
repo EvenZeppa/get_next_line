@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*    get_next_line.c                                   :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ezeppa <ezeppa@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/29 01:01:42 by ezeppa            #+#    #+#             */
-/*   Updated: 2024/11/29 01:06:04 by ezeppa           ###   ########.fr       */
+/*   Updated: 2024/12/09 19:05:52 by ezeppa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,67 +78,47 @@ size_t	ft_strlcat(char *dst, const char *src, size_t size)
 	return (dst_len + src_len);
 }
 
-char *add_new_read(int fd, char *ptr)
+char	*ft_strjoin(const char *s1, const char *s2)
 {
-	char	*new_ptr;
-	char	buffer[BUFFER_SIZE + 1];
-	int		read_nb;
+	char	*ptr;
+	size_t	s1_len;
+	size_t	s2_len;
 
-	read_nb = read(fd, buffer, BUFFER_SIZE);
-	if (read_nb <= 0)
+	s1_len = ft_strlen(s1);
+	s2_len = ft_strlen(s2);
+	ptr = malloc(sizeof(char) * (s1_len + s2_len + 1));
+	if (!ptr)
 		return (ptr);
-	buffer[read_nb] = '\0';
-	size_t old_len = (ptr) ? strlen(ptr) : 0;
-	new_ptr = malloc(old_len + read_nb + 1);
-	if (!new_ptr)
-		return (NULL);
-	if (ptr)
-	{
-		strcpy(new_ptr, ptr);
-		free(ptr);
-	}
-	else
-		new_ptr[0] = '\0';
-	strcat(new_ptr, buffer);
-	return (new_ptr);
+	ft_strlcpy(ptr, s1, s1_len + 1);
+	ft_strlcat(ptr, s2, s1_len + s2_len + 1);
+	return (ptr);
 }
 
-char	*str_until_i(char *ptr, int i)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	char	*res;
+	char	*ptr;
 
-	res = malloc(i + 2);
-	if (!res)
+	if (!s)
 		return (NULL);
-	ft_strlcpy(res, ptr, i + 2);
-	res[i + 1] = '\0';
-	return (res);
+	if (start > ft_strlen(s))
+		return (ft_strdup(""));
+	if (len > ft_strlen(s) - start)
+		len = ft_strlen(s) - start;
+	ptr = malloc(sizeof(char) * (len + 1));
+	if (!ptr)
+		return (ptr);
+	ft_strlcpy(ptr, &s[start], (len + 1));
+	return (ptr);
 }
+
+typedef struct	s_reader
+{
+	int				fd;
+	char			*ptr;
+	struct s_reader	*next;
+}	t_reader;
 
 char	*get_next_line(int fd)
 {
-	static char	*ptr[64];
-	char		*res;
-	char		*temp;
-	int			i;
-
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	ptr[fd] = add_new_read(fd, ptr[fd]);
-	if (!ptr)
-		return (NULL);
-	i = 0;
-	while (ptr[fd][i] && ptr[fd][i] != '\n')
-		i++;
-	if (ptr[fd][i] == '\0')
-	{
-		ptr[fd] = add_new_read(fd, ptr[fd]);
-		if (!ptr[fd] || ptr[fd][0] == '\0')
-			return (NULL);
-		return (get_next_line(fd));
-	}
-	res = str_until_i(ptr[fd], i);
-	temp = ptr[fd];
-	ptr[fd] = ft_strdup(ptr[fd] + i + 1);
-	return (free(temp), res);
+	static t_reader	*reader;
 }
