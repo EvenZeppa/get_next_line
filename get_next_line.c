@@ -6,7 +6,7 @@
 /*   By: ezeppa <ezeppa@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/29 01:01:42 by ezeppa            #+#    #+#             */
-/*   Updated: 2024/12/10 16:30:47 by ezeppa           ###   ########.fr       */
+/*   Updated: 2024/12/10 16:44:49 by ezeppa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,18 +137,14 @@ char	*process_line(char **text)
 			line = NULL;
 		else
 			line = ft_strldup(*text, ft_strlen(*text) + 1);
-		free(*text);
-		*text = NULL;
-		return (line);
+		return (free(*text), *text = NULL, line);
 	}
 	pos_n = ft_strchr(*text, '\n') - *text;
 	line = ft_strldup(*text, pos_n + 2);
 	if (!line)
 		return (free(*text), *text = NULL, NULL);
 	tmp = ft_substr(*text, pos_n + 1, ft_strlen(*text) - pos_n);
-	free(*text);
-	*text = tmp;
-	return (line);
+	return (free(*text), *text = tmp, line);
 }
 
 char	*get_next_line(int fd)
@@ -166,12 +162,10 @@ char	*get_next_line(int fd)
 	while (!ft_strchr(text, '\n'))
 	{
 		br = read(fd, buffer, BUFFER_SIZE);
-		if (br <= 0)
-		{
-			if (br == -1)
-				return (free(buffer), free(text), text = NULL, NULL);
+		if (br == -1)
+			return (free(buffer), free(text), text = NULL, NULL);
+		if (br == 0)
 			return (free(buffer), process_line(&text));
-		}
 		buffer[br] = '\0';
 		tmp = text;
 		text = ft_strjoin(text, buffer);
