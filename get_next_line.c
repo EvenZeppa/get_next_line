@@ -6,7 +6,7 @@
 /*   By: ezeppa <ezeppa@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/29 01:01:42 by ezeppa            #+#    #+#             */
-/*   Updated: 2024/12/09 19:54:31 by ezeppa           ###   ########.fr       */
+/*   Updated: 2024/12/10 16:30:47 by ezeppa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ char	*ft_strchr(const char *s, int c)
 {
 	char	*ptr;
 
+	if (!s)
+		return (NULL);
 	ptr = (char *)s;
 	while (*ptr && *ptr != (unsigned char)c)
 		ptr++;
@@ -58,7 +60,6 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 
 char	*ft_strldup(const char *s, size_t size)
 {
-	int		s_len;
 	char	*ptr;
 
 	ptr = malloc(sizeof(char) * size);
@@ -122,66 +123,60 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	return (ptr);
 }
 
-typedef struct	s_reader
+char	*process_line(char **text)
 {
-	int				fd;
-	char			*ptr;
-	struct s_reader	*next;
-}	t_reader;
+	char	*tmp;
+	char	*line;
+	int		pos_n;
 
-t_reader	*add_back_reader(t_reader *reader, int fd)
-{
-	t_reader	*new;
-	t_reader	*current;
-
-	new = malloc(sizeof(t_reader) * 1);
-	if (!new)
-		return (NULL);
-	new->fd = fd;
-	new->ptr = ft_strldup("", 1);
-	new->next = NULL;
-	current = reader;
-	while (current && current->next)
-		current = current->next;
-	if (current)
-		current->next = new;
-	return (new);
-}
-
-t_reader	*get_reader_by_fd(t_reader *reader, int fd)
-{
-	t_reader		*current_reader;
-
-	current_reader = reader;
-	while (current_reader)
+	if (!text || !*text)
+		return (free(*text), *text = NULL, NULL);
+	if (!ft_strchr(*text, '\n'))
 	{
-		if (current_reader->fd == fd)
-			return (current_reader);
-		current_reader = current_reader->next;
+		if (**text == '\0')
+			line = NULL;
+		else
+			line = ft_strldup(*text, ft_strlen(*text) + 1);
+		free(*text);
+		*text = NULL;
+		return (line);
 	}
-	return (add_back_reader(reader, fd));
+	pos_n = ft_strchr(*text, '\n') - *text;
+	line = ft_strldup(*text, pos_n + 2);
+	if (!line)
+		return (free(*text), *text = NULL, NULL);
+	tmp = ft_substr(*text, pos_n + 1, ft_strlen(*text) - pos_n);
+	free(*text);
+	*text = tmp;
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static t_reader	*reader;
-	t_reader		*current_reader;
-	char			*buffer;
-	int				len;
+	static char	*text = NULL;
+	char		*tmp;
+	char		*buffer;
+	int			br;
 
-	if (!reader)
-		reader = add_back_reader(reader, fd);
-	current_reader = get_reader_by_fd(reader, fd);
+	if (fd < 0)
+		return (free(text), text = NULL, NULL);
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!current_reader || !buffer)
-		return (NULL);
-	len = read(current_reader->fd, buffer, BUFFER_SIZE);
-	buffer[len] = '\0';
-	current_reader->ptr = ft_strjoin(current_reader->ptr, buffer);
-	if (!ft_strchr(current_reader->ptr, '\n'))
-		return (free(buffer), get_next_line(fd));
-	free(buffer);
-	buffer = ft_strldup(current_reader->ptr,
-		(ft_strchr(current_reader->ptr, '\n') - current_reader->ptr + 1));
-	return (free(buffer), current_reader->ptr);
+	if (!buffer)
+		return (free(text), text = NULL, NULL);
+	while (!ft_strchr(text, '\n'))
+	{
+		br = read(fd, buffer, BUFFER_SIZE);
+		if (br <= 0)
+		{
+			if (br == -1)
+				return (free(buffer), free(text), text = NULL, NULL);
+			return (free(buffer), process_line(&text));
+		}
+		buffer[br] = '\0';
+		tmp = text;
+		text = ft_strjoin(text, buffer);
+		free(tmp);
+		tmp = NULL;
+	}
+	return (free(buffer), process_line(&text));
 }
